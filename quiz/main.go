@@ -59,17 +59,34 @@ func main() {
 
 	var (
 		correct = 0
-		answer string
+		questionsAmt = 0
 	)
 
-	for i, v := range tasks {
-		fmt.Printf("%d) %s\n", i, v.Question)
+	timer := time.NewTimer(limit)
+
+	taskChannel := make(chan bool)
+
+	questionFunc := func(i int, t *Task) {
+		var answer string
+		fmt.Printf("%d) %s\n", i + 1, t.Question)
 		fmt.Scanln(&answer)
 		answer = strings.TrimSpace(answer)
-		if answer == v.Answer {
-			correct += 1
+		taskChannel <- answer == t.Answer
+	}
+
+	taskLoop: for i, t := range tasks {
+		go questionFunc(i, &t)
+		select {
+		case <- timer.C :
+			fmt.Println("Time is up")
+			break taskLoop
+		case answerRight := <- taskChannel :
+			if answerRight {
+				correct += 1
+			}
+			questionsAmt += 1
 		}
 	}
 
-	fmt.Printf("\n%d correct answers from %d\n", correct, len(tasks))
+	fmt.Printf("\n%d correct answers from %d\n", correct, questionsAmt)
 }
