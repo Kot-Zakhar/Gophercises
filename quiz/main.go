@@ -7,6 +7,7 @@ import (
 	"io"
 	"strings"
 	"flag"
+	"time"
 )
 
 type Task struct {
@@ -22,10 +23,10 @@ func getTasks(filename string) (tasks []Task, err error) {
 	}
 	defer file.Close()
 
-	csv_reader := csv.NewReader(file)
+	csvReader := csv.NewReader(file)
 
 	for {
-		record, err := csv_reader.Read()
+		record, err := csvReader.Read()
 		if err == io.EOF {
 			break
 		}
@@ -40,19 +41,26 @@ func getTasks(filename string) (tasks []Task, err error) {
 }
 
 func main() {
-	var filename string
-	var limit int
+	var (
+		filename string
+		limit time.Duration
+	)
 
-	flag.StringVar(&filename, "csv", "./problems.csv", "a csv file in the format of 'question,answer' (default \"problems.csv\"")
-	flag.IntVar(&limit, "limit", 30, "the time limit for the quiz in seconds (default 30)")
+	flag.StringVar(&filename, "csv", "./problems.csv", "a csv file in the format of 'question,answer'")
+	flag.DurationVar(&limit, "limit", 30 * time.Second, "the time limit for the quiz in seconds")
 
 	flag.Parse()
 
-	var tasks, _ = getTasks(filename)
-	// TODO: add error processing
+	tasks, err := getTasks(filename)
+	if err != nil {
+		fmt.Print(err)
+		return
+	}
 
-	var correct = 0
-	var answer string
+	var (
+		correct = 0
+		answer string
+	)
 
 	for i, v := range tasks {
 		fmt.Printf("%d) %s\n", i, v.Question)
