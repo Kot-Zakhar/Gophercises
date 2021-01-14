@@ -72,20 +72,21 @@ func main() {
 		taskChannel <- answer == t.Answer
 	}
 
-taskLoop:
-	for i, t := range tasks {
-		go questionFunc(i, &t)
-		select {
-		case <-timer.C:
-			fmt.Println("Time is up")
-			break taskLoop
-		case answerRight := <-taskChannel:
-			if answerRight {
-				correct++
+	func() {
+		for i, t := range tasks {
+			go questionFunc(i, &t)
+			select {
+			case <-timer.C:
+				fmt.Println("Time is up")
+				return
+			case answerRight := <-taskChannel:
+				if answerRight {
+					correct++
+				}
+				questionsAmt++
 			}
-			questionsAmt++
 		}
-	}
+	}()
 
 	fmt.Printf("\n%d correct answers from %d\n", correct, questionsAmt)
 }
