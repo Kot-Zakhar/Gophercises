@@ -1,18 +1,18 @@
 package main
 
 import (
-	"fmt"
-	"os"
 	"encoding/csv"
-	"io"
-	"strings"
 	"flag"
+	"fmt"
+	"io"
+	"os"
+	"strings"
 	"time"
 )
 
 type Task struct {
 	Question string
-	Answer string
+	Answer   string
 }
 
 func getTasks(filename string) (tasks []Task, err error) {
@@ -29,11 +29,9 @@ func getTasks(filename string) (tasks []Task, err error) {
 		record, err := csvReader.Read()
 		if err == io.EOF {
 			break
-		}
-		if err != nil {
+		} else if err != nil {
 			return nil, err
 		}
-
 		tasks = append(tasks, Task{record[0], record[1]})
 	}
 
@@ -43,11 +41,11 @@ func getTasks(filename string) (tasks []Task, err error) {
 func main() {
 	var (
 		filename string
-		limit time.Duration
+		limit    time.Duration
 	)
 
 	flag.StringVar(&filename, "csv", "./problems.csv", "a csv file in the format of 'question,answer'")
-	flag.DurationVar(&limit, "limit", 30 * time.Second, "the time limit for the quiz in seconds")
+	flag.DurationVar(&limit, "limit", 30*time.Second, "the time limit for the quiz in seconds")
 
 	flag.Parse()
 
@@ -58,7 +56,7 @@ func main() {
 	}
 
 	var (
-		correct = 0
+		correct      = 0
 		questionsAmt = 0
 	)
 
@@ -68,23 +66,24 @@ func main() {
 
 	questionFunc := func(i int, t *Task) {
 		var answer string
-		fmt.Printf("%d) %s\n", i + 1, t.Question)
+		fmt.Printf("%d) %s\n", i+1, t.Question)
 		fmt.Scanln(&answer)
 		answer = strings.TrimSpace(answer)
 		taskChannel <- answer == t.Answer
 	}
 
-	taskLoop: for i, t := range tasks {
+taskLoop:
+	for i, t := range tasks {
 		go questionFunc(i, &t)
 		select {
-		case <- timer.C :
+		case <-timer.C:
 			fmt.Println("Time is up")
 			break taskLoop
-		case answerRight := <- taskChannel :
+		case answerRight := <-taskChannel:
 			if answerRight {
-				correct += 1
+				correct++
 			}
-			questionsAmt += 1
+			questionsAmt++
 		}
 	}
 
