@@ -114,22 +114,20 @@ func (d Deck) Sort(less func(int, int) bool) {
 	sort.SliceStable(d, less)
 }
 
-func (d *Deck) Filter(leave func(Card) bool) *Deck {
+func (d Deck) Filter(leave func(Card) bool) Deck {
 	filtered := make(Deck, 0)
 
-	for i := range *d {
-		if leave((*d)[i]) {
-			filtered = append(filtered, (*d)[i])
+	for i := range d {
+		if leave(d[i]) {
+			filtered = append(filtered, d[i])
 		}
 	}
 
-	*d = filtered
-
-	return d
+	return filtered
 }
 
-func (d *Deck) HasCard(card Card) bool {
-	for _, c := range *d {
+func (d Deck) HasCard(card Card) bool {
+	for _, c := range d {
 		if c.Value == card.Value && c.Suit == card.Suit {
 			return true
 		}

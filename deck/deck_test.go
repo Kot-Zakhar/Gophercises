@@ -117,9 +117,9 @@ func TestDeckFiltering(t *testing.T) {
 				return true
 			}
 
-			deck.Filter(filter)
+			filteredDeck := deck.Filter(filter)
 
-			for _, card := range deck {
+			for _, card := range filteredDeck {
 				if !filter(card) {
 					t.Errorf("Filter is not working: card %s should has been deleted.\nDeck: %s", card, deck)
 					break
