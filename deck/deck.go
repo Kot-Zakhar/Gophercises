@@ -9,31 +9,33 @@ import (
 type CardValue int
 
 const (
-	V_Joker CardValue = iota
-	V_A
-	V_1
-	V_2
-	V_3
-	V_4
-	V_5
-	V_6
-	V_7
-	V_8
-	V_9
-	V_10
-	V_J
-	V_Q
-	V_K
+	VJoker CardValue = iota
+	VA
+	V1
+	V2
+	V3
+	V4
+	V5
+	V6
+	V7
+	V8
+	V9
+	V10
+	VJ
+	VQ
+	VK
+	VAmount = VK
 )
 
 type CardSuit int
 
 const (
-	S_Joker CardSuit = iota
-	S_Spades
-	S_Diamonds
-	S_Clubs
-	S_Hearts
+	SJoker CardSuit = iota
+	SSpades
+	SDiamonds
+	SClubs
+	SHearts
+	SAmount = SHearts
 )
 
 type Card struct {
@@ -41,17 +43,13 @@ type Card struct {
 	Suit  CardSuit
 }
 
-func (c *Card) Equals(card *Card) bool {
-	return c.Value == card.Value && c.Suit == card.Suit
-}
-
 type Deck []Card
 
 func New() Deck {
 	result := make(Deck, 0)
 
-	for suit := CardSuit(1); suit < 5; suit++ {
-		for value := CardValue(1); value < 14; value++ {
+	for suit := CardSuit(1); suit < SAmount; suit++ {
+		for value := CardValue(1); value < VAmount; value++ {
 			result = append(result, Card{value, suit})
 		}
 	}
@@ -83,7 +81,7 @@ func (d Deck) Swap(i, j int) {
 }
 
 func (d Deck) AddJoker() Deck {
-	return append(d, Card{V_Joker, S_Joker})
+	return append(d, Card{VJoker, SJoker})
 }
 
 func (d Deck) AddJokers(amount int) Deck {

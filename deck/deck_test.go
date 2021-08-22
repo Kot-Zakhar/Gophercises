@@ -17,7 +17,7 @@ func TestCardSwap(t *testing.T) {
 	deck := New()
 	first := deck[0]
 	deck.Swap(0, deck.Len()-1)
-	if !first.Equals(&deck[deck.Len()-1]) {
+	if first != deck[deck.Len()-1] {
 		t.Error("Swap doesn't swaps")
 	}
 }
@@ -31,22 +31,17 @@ func TestShufflingTheDeck(t *testing.T) {
 		t.Error("Shuffle() doesn't shuffles the deck.")
 	}
 
-	shuffledDeck := make(Deck, len(deck))
-	copy(shuffledDeck, deck)
+	newDeck := New()
 
-	deck.Shuffle()
+	newDeck.Shuffle()
 
-	different := false
 	for i, card := range deck {
-		if card.Value != shuffledDeck[i].Value || card.Suit != shuffledDeck[i].Suit {
-			different = true
-			break
+		if card != newDeck[i] {
+			return
 		}
 	}
 
-	if !different {
-		t.Error("Shuffle() is not randomized.")
-	}
+	t.Error("Shuffle() is not randomized.")
 }
 
 func TestDefaultSort(t *testing.T) {
@@ -62,36 +57,34 @@ func TestDefaultSort(t *testing.T) {
 func TestAddingJoker(t *testing.T) {
 	deck := New().AddJoker()
 
-	if !deck.HasCard(Card{V_Joker, S_Joker}) {
+	if !deck.HasCard(Card{VJoker, SJoker}) {
 		t.Error("Adding Jokers failed")
 	}
 }
 
 func TestDeckFiltering(t *testing.T) {
-	type test_t struct {
+	tests := []struct {
 		values []CardValue
 		suits  []CardSuit
 		cards  []Card
-	}
-
-	tests := []test_t{
+	}{
 		{
 			[]CardValue{},
 			[]CardSuit{},
-			[]Card{{V_2, S_Hearts}},
+			[]Card{{V2, SHearts}},
 		}, {
-			[]CardValue{V_2, V_3},
-			[]CardSuit{S_Diamonds},
-			[]Card{{V_J, S_Hearts}},
+			[]CardValue{V2, V3},
+			[]CardSuit{SDiamonds},
+			[]Card{{VJ, SHearts}},
 		}, {
 			[]CardValue{},
-			[]CardSuit{S_Clubs},
+			[]CardSuit{SClubs},
 			[]Card{},
 		},
 	}
 
 	for _, test := range tests {
-		testname := fmt.Sprint(test.values, test.suits, test.cards)
+		testname := fmt.Sprintf("%s %s %s", test.values, test.suits, test.cards)
 		t.Run(testname, func(t *testing.T) {
 			deck := New()
 
@@ -109,7 +102,7 @@ func TestDeckFiltering(t *testing.T) {
 				}
 
 				for _, c := range test.cards {
-					if card.Equals(&c) {
+					if card == c {
 						return false
 					}
 				}
@@ -121,8 +114,7 @@ func TestDeckFiltering(t *testing.T) {
 
 			for _, card := range filteredDeck {
 				if !filter(card) {
-					t.Errorf("Filter is not working: card %s should has been deleted.\nDeck: %s", card, deck)
-					break
+					t.Fatalf("Filter is not working: card %s should has been deleted.\nDeck: %s", card, deck)
 				}
 			}
 
